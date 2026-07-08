@@ -1,0 +1,109 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+  INDUSTRY_SUPERVISOR
+  INSTITUTIONAL_SUPERVISOR
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  role          Role
+  firstName     String
+  lastName      String
+  phoneNumber   String?
+  resetToken    String?
+  resetTokenExpires DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Direct Flat Hierarchy mappings: Logbook entries and Reports point to User ID
+  logbookEntries             LogbookEntry[]
+  reports                    Report[]
+
+  // Student Profile mapping
+  studentProfile             StudentProfile? @relation("StudentToProfile")
+
+  // Supervisor assignments (Institutional and Industry supervisors can have multiple assigned student profiles)
+  assignedInstStudents       StudentProfile[] @relation("InstSupervisorToStudents")
+  assignedIndStudents        StudentProfile[] @relation("IndSupervisorToStudents")
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id                        String   @id @default(uuid())
+  studentId                 String   @unique
+  matricNumber              String   @unique
+  department                String
+  companyName               String
+  companyAddress            String?
+  startDate                 DateTime? @db.Date
+  status                    ApprovalStatus @default(PENDING)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  // Relations
+  student                   User     @relation("StudentToProfile", fields: [studentId], references: [id], onDelete: Cascade)
+  
+  // Optional Supervisor Foreign Keys for role-based dashboard scoping
+  institutionalSupervisorId String?  @map("inst_supervisor_id")
+  institutionalSupervisor   User?    @relation("InstSupervisorToStudents", fields: [institutionalSupervisorId], references: [id], onDelete: SetNull)
+  
+  industrySupervisorId      String?  @map("industry_supervisor_id")
+  industrySupervisor        User?    @relation("IndSupervisorToStudents", fields: [industrySupervisorId], references: [id], onDelete: SetNull)
+
+  @@map("student_profiles")
+}
+
+model LogbookEntry {
+  id                String         @id @default(uuid())
+  studentId         String         @map("student_id")
+  date              DateTime       @db.Date
+  weekNumber        Int            @map("week_number")
+  dailyDescription  String         @map("daily_description") @db.Text
+  departmentSection String?        @map("department_section")
+  skillsAcquired    String         @map("skills_acquired") @db.Text
+  approvalStatus    ApprovalStatus @default(PENDING) @map("approval_status")
+  comments          String?        @db.Text
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  // Relation: Flat mapping directly to the Student's User ID
+  student           User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date]) // A student can submit only one entry per date
+  @@map("logbook_entries")
+}
+
+model Report {
+  id             String   @id @default(uuid())
+  studentId      String   @unique @map("student_id") // One final report submission per student
+  pdfUrl         String   @map("pdf_url") // URL/Path to Supabase Storage bucket
+  submissionDate DateTime @default(now()) @map("submission_date")
+  academicGrade  Float?   @map("academic_grade")
+  feedback       String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relation: Flat mapping directly to the Student's User ID
+  student        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
