@@ -450,7 +450,7 @@ export const Login = () => {
                     onChange={(e) => setInstSupervisorId(e.target.value)}
                     className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-3.5 py-2.5 text-xs outline-none cursor-pointer transition-all duration-150"
                   >
-                    <option value="">-- Select Faculty Supervisor --</option>
+                    <option value="">-- Select University Supervisor --</option>
                     {instSupervisors.map((s) => (
                       <option key={s.id} value={s.id}>
                         {s.firstName} {s.lastName} - {s.institution || "General"}
