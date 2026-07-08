@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useAuth, LogEntry } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
-import { Calendar, FileText, Upload, Plus, LogOut, CheckCircle, Clock, AlertCircle, Settings, X, Building2, Trash2 } from "lucide-react";
+import { Calendar, FileText, Upload, Plus, LogOut, CheckCircle, Clock, AlertCircle, Settings, X, Building2, Trash2, Sun, Moon } from "lucide-react";
 
 export const StudentDashboard = () => {
-  const { user, logout, students, addLogbookEntry, submitReport, updatePlacement, updateLogbookEntry, deleteLogbookEntry, isMockMode } = useAuth();
+  const { user, logout, students, addLogbookEntry, submitReport, updatePlacement, updateLogbookEntry, deleteLogbookEntry, isMockMode, theme, toggleTheme } = useAuth();
   // Safe lookup of the student's profile: use first element in students state or fallback to user metadata
   const studentProfile = students[0] || {
     id: user?.id || "unknown",
@@ -275,8 +275,15 @@ export const StudentDashboard = () => {
             <p className="text-xs text-slate-400">{studentProfile.matricNumber}</p>
           </div>
           <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
+            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          >
+            {theme === "light" ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+          </button>
+          <button
             onClick={logout}
-            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200"
+            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
             title="Log Out"
           >
             <LogOut className="w-4.5 h-4.5" />

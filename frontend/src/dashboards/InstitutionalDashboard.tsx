@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useAuth, StudentProfile } from "../context/AuthContext";
-import { Award, FileText, CheckCircle2, AlertTriangle, HelpCircle, GraduationCap, ArrowRight, LogOut, Clock } from "lucide-react";
+import { Award, FileText, CheckCircle2, AlertTriangle, HelpCircle, GraduationCap, ArrowRight, LogOut, Clock, Sun, Moon } from "lucide-react";
 
 export const InstitutionalDashboard = () => {
-  const { user, logout, students, gradeReport, isMockMode } = useAuth();
+  const { user, logout, students, gradeReport, isMockMode, theme, toggleTheme } = useAuth();
 
   const [selectedStudentId, setSelectedStudentId] = useState<string>("stud-2"); // Default to student with report pre-uploaded
   const [grade, setGrade] = useState("");
@@ -42,8 +42,15 @@ export const InstitutionalDashboard = () => {
               <p className="text-xs text-slate-400">{user?.email}</p>
             </div>
             <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
+              title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+            >
+              {theme === "light" ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+            </button>
+            <button
               onClick={logout}
-              className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200"
+              className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
               title="Log Out"
             >
               <LogOut className="w-4.5 h-4.5" />
@@ -140,8 +147,15 @@ export const InstitutionalDashboard = () => {
             <p className="text-xs text-slate-400">{user?.email}</p>
           </div>
           <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
+            title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          >
+            {theme === "light" ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+          </button>
+          <button
             onClick={logout}
-            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200"
+            className="p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer"
             title="Log Out"
           >
             <LogOut className="w-4.5 h-4.5" />

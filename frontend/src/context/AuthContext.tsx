@@ -57,6 +57,8 @@ interface AuthContextType {
   showLogoutConfirm: boolean;
   setShowLogoutConfirm: (show: boolean) => void;
   confirmLogout: () => void;
+  theme: "light" | "dark";
+  toggleTheme: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -122,6 +124,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("siwes_theme");
+    if (saved === "light" || saved === "dark") return saved;
+    return "dark"; // Default to dark as premium baseline
+  });
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("siwes_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   // Sync data from session storage on mount safely
   useEffect(() => {
@@ -607,6 +628,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         showLogoutConfirm,
         setShowLogoutConfirm,
         confirmLogout,
+        theme,
+        toggleTheme,
       }}
     >
       {children}

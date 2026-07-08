@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth, Role } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
-import { ShieldCheck, UserPlus, LogIn, KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ShieldCheck, UserPlus, LogIn, KeyRound, ArrowLeft, Eye, EyeOff, Sun, Moon } from "lucide-react";
 
 interface SupervisorOption {
   id: string;
@@ -14,7 +14,7 @@ interface SupervisorOption {
 }
 
 export const Login = () => {
-  const { login, registerUser, requestPasswordReset, completePasswordReset } = useAuth();
+  const { login, registerUser, requestPasswordReset, completePasswordReset, theme, toggleTheme } = useAuth();
   
   // Auth Modes: 'signin' | 'signup' | 'forgot'
   const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot">("signin");
@@ -182,8 +182,17 @@ export const Login = () => {
   const indSupervisors = Array.isArray(supervisors) ? supervisors.filter((s) => s.role === "INDUSTRY_SUPERVISOR") : [];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black transition-all duration-300">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black transition-all duration-300 relative">
       
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-6 right-6 p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-200 transition-all duration-200 cursor-pointer z-50"
+        title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+      >
+        {theme === "light" ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
+      </button>
+
       {/* Central Auth Card */}
       <div className={`glass w-full p-8 rounded-3xl shadow-2xl flex flex-col gap-5 relative overflow-hidden transition-all duration-300 ${
         authMode === "signup" ? "max-w-2xl" : "max-w-md"
