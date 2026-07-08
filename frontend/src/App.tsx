@@ -42,19 +42,7 @@ const LogoutConfirmModal = () => {
 };
 
 const DashboardRouter = () => {
-  const { user, isLoading, students } = useAuth();
-
-  if (user && isLoading && students.length === 0) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center gap-4 text-center">
-        <div className="w-10 h-10 rounded-full border-3 border-indigo-500 border-t-transparent animate-spin"></div>
-        <div>
-          <h3 className="text-sm font-bold text-slate-200">Synchronizing cloud database...</h3>
-          <p className="text-xs text-slate-500 mt-1">Fetching your SIWES logs and profile...</p>
-        </div>
-      </div>
-    );
-  }
+  const { user } = useAuth();
 
   if (!user) {
     return <Login />;

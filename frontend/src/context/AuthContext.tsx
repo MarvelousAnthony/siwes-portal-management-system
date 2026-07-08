@@ -29,7 +29,7 @@ export interface StudentProfile {
   matricNumber: string;
   department: string;
   companyName: string;
-  status: "Pending Industry" | "Verified by Industry" | "Not Submitted" | "Pending Verification" | "Declined by Industry";
+  status: "Pending Industry" | "Verified by Industry" | "Not Submitted" | "Pending Verification" | "Declined by Industry" | "Submitted";
   pdfUrl?: string;
   grade?: number;
   feedback?: string;
@@ -169,11 +169,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             matricNumber: currentUser.studentProfile?.matricNumber || "CVE/2026/0001",
             department: currentUser.studentProfile?.department || "Civil Engineering",
             companyName: currentUser.studentProfile?.companyName || "BuildCo Ltd",
-            status: currentUser.studentProfile?.status === "APPROVED"
-              ? "Verified by Industry"
-              : currentUser.studentProfile?.status === "REJECTED"
-              ? "Declined by Industry"
-              : "Pending Verification",
+            status: currentUser.studentProfile?.pdfUrl ? "Submitted" : "Not Submitted",
             pdfUrl: currentUser.studentProfile?.pdfUrl || undefined,
             logbookEntries: safeLogs.map((l: any) => ({
               id: l.id,
