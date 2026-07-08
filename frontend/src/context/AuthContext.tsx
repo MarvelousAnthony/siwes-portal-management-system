@@ -1,5 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
-import { apiRequest, setAuthToken, clearAuthToken, getAuthToken } from "../lib/api";
+import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import { apiRequest, setAuthToken, clearAuthToken } from "../lib/api";
 
 export type Role = "STUDENT" | "INDUSTRY_SUPERVISOR" | "INSTITUTIONAL_SUPERVISOR" | "ADMIN";
 
@@ -29,7 +29,7 @@ export interface StudentProfile {
   matricNumber: string;
   department: string;
   companyName: string;
-  status: "Pending Industry" | "Verified by Industry" | "Not Submitted";
+  status: "Pending Industry" | "Verified by Industry" | "Not Submitted" | "Pending Verification" | "Declined by Industry";
   pdfUrl?: string;
   grade?: number;
   feedback?: string;
@@ -233,7 +233,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [user, isMockMode]);
 
-  const login = async (email: string, password: string, role: Role) => {
+  const login = async (email: string, password: string, _role: Role) => {
     setIsLoading(true);
     try {
       // Try to login to backend server

@@ -1,5 +1,3 @@
-import { Role } from "../context/AuthContext";
-
 const API_BASE_URL = "http://localhost:4000/api";
 
 // Helper to get JWT token from localStorage

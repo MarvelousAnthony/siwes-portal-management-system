@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth, Role } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
-import { ShieldCheck, BookOpen, Building2, School, UserPlus, LogIn, KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { ShieldCheck, UserPlus, LogIn, KeyRound, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 interface SupervisorOption {
   id: string;

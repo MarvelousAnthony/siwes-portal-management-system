@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth, StudentProfile, LogEntry } from "../context/AuthContext";
+import { useAuth, LogEntry } from "../context/AuthContext";
 import { Users, FileCheck, Check, X, MessageSquare, LogOut, CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 export const IndustryDashboard = () => {

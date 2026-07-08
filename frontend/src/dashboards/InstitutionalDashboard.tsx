@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth, StudentProfile } from "../context/AuthContext";
-import { Award, FileText, CheckCircle2, AlertTriangle, HelpCircle, GraduationCap, ArrowRight, LogOut, CheckCircle, Clock } from "lucide-react";
+import { Award, FileText, CheckCircle2, AlertTriangle, HelpCircle, GraduationCap, ArrowRight, LogOut, Clock } from "lucide-react";
 
 export const InstitutionalDashboard = () => {
   const { user, logout, students, gradeReport, isMockMode } = useAuth();
