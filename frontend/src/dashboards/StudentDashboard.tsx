@@ -375,7 +375,7 @@ export const StudentDashboard = () => {
                       <option value="">-- Select Industry Supervisor --</option>
                       {supervisors.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.firstName} {s.lastName} ({s.email})
+                          {s.firstName} {s.lastName} - {s.companyName || "General"}
                         </option>
                       ))}
                     </select>

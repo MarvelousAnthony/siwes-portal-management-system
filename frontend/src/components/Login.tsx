@@ -9,6 +9,8 @@ interface SupervisorOption {
   lastName: string;
   role: string;
   email: string;
+  companyName?: string;
+  institution?: string;
 }
 
 export const Login = () => {
@@ -451,7 +453,7 @@ export const Login = () => {
                     <option value="">-- Select Faculty Supervisor --</option>
                     {instSupervisors.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.firstName} {s.lastName} ({s.email})
+                        {s.firstName} {s.lastName} - {s.institution || "General"}
                       </option>
                     ))}
                   </select>
@@ -467,7 +469,7 @@ export const Login = () => {
                     <option value="">-- Select Company Supervisor --</option>
                     {indSupervisors.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.firstName} {s.lastName} ({s.email})
+                        {s.firstName} {s.lastName} - {s.companyName || "General"}
                       </option>
                     ))}
                   </select>

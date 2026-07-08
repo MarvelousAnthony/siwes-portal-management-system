@@ -206,6 +206,8 @@ export const getSupervisors = async (req: Request, res: Response): Promise<void>
         role: true,
         firstName: true,
         lastName: true,
+        companyName: true,
+        institution: true,
       },
       orderBy: { firstName: "asc" },
     });
