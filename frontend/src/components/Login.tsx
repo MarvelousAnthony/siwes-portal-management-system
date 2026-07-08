@@ -41,6 +41,7 @@ export const Login = () => {
   const [companyAddress, setCompanyAddress] = useState("");
   const [instSupervisorId, setInstSupervisorId] = useState("");
   const [indSupervisorId, setIndSupervisorId] = useState("");
+  const [institution, setInstitution] = useState("");
 
   // Supervisors state loaded from Backend
   const [supervisors, setSupervisors] = useState<SupervisorOption[]>([]);
@@ -111,6 +112,22 @@ export const Login = () => {
       payload.industrySupervisorId = indSupervisorId || undefined;
     }
 
+    if (role === "INDUSTRY_SUPERVISOR") {
+      if (!companyName) {
+        alert("Company Name is required for Industry Supervisors.");
+        return;
+      }
+      payload.companyName = companyName;
+    }
+
+    if (role === "INSTITUTIONAL_SUPERVISOR") {
+      if (!institution) {
+        alert("Institution Name is required for Faculty Supervisors.");
+        return;
+      }
+      payload.institution = institution;
+    }
+
     const success = await registerUser(payload);
     if (success) {
       // Clear form inputs
@@ -123,6 +140,7 @@ export const Login = () => {
       setCompanyAddress("");
       setInstSupervisorId("");
       setIndSupervisorId("");
+      setInstitution("");
       
       // Redirect to signin tab
       setAuthMode("signin");
@@ -453,6 +471,46 @@ export const Login = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+              </>
+            )}
+
+            {role === "INDUSTRY_SUPERVISOR" && (
+              <>
+                <div className="md:col-span-2 border-t border-slate-850/80 my-2 pt-3">
+                  <h4 className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Industry Supervisor Details</h4>
+                </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-400">Company Name where you work *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BuildCo Infrastructures Ltd"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2.5 text-xs outline-none transition-all duration-150"
+                    required
+                  />
+                </div>
+              </>
+            )}
+
+            {role === "INSTITUTIONAL_SUPERVISOR" && (
+              <>
+                <div className="md:col-span-2 border-t border-slate-850/80 my-2 pt-3">
+                  <h4 className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">Institutional Supervisor Details</h4>
+                </div>
+
+                <div className="md:col-span-2 flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-slate-400">Institution / University Name where you work *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. University of Lagos"
+                    value={institution}
+                    onChange={(e) => setInstitution(e.target.value)}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2.5 text-xs outline-none transition-all duration-150"
+                    required
+                  />
                 </div>
               </>
             )}

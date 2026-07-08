@@ -17,6 +17,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       firstName,
       lastName,
       phoneNumber,
+      institution,
       // StudentProfile specific fields
       matricNumber,
       department,
@@ -67,6 +68,16 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       }
     }
 
+    // Supervisor specific validations
+    if (role === Role.INDUSTRY_SUPERVISOR && !companyName) {
+      res.status(400).json({ error: "Company name is required for Industry Supervisors" });
+      return;
+    }
+    if (role === Role.INSTITUTIONAL_SUPERVISOR && !institution) {
+      res.status(400).json({ error: "Institution is required for Institutional Supervisors" });
+      return;
+    }
+
     // Run in a transaction to guarantee User and StudentProfile are created together
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -77,6 +88,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           firstName,
           lastName,
           phoneNumber,
+          companyName: role === Role.INDUSTRY_SUPERVISOR ? companyName : undefined,
+          institution: role === Role.INSTITUTIONAL_SUPERVISOR ? institution : undefined,
         },
       });
 

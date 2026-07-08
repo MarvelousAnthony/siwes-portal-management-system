@@ -28,6 +28,8 @@ model User {
   firstName     String
   lastName      String
   phoneNumber   String?
+  companyName   String?
+  institution   String?
   resetToken    String?
   resetTokenExpires DateTime?
   createdAt     DateTime @default(now())
