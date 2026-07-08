@@ -54,6 +54,9 @@ interface AuthContextType {
   updatePlacement: (companyName: string, companyAddress: string, industrySupervisorId: string, startDate?: string) => Promise<void>;
   updateLogbookEntry: (logId: string, entry: Omit<LogEntry, "id" | "approvalStatus">) => Promise<void>;
   deleteLogbookEntry: (logId: string) => Promise<void>;
+  showLogoutConfirm: boolean;
+  setShowLogoutConfirm: (show: boolean) => void;
+  confirmLogout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -118,6 +121,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isMockMode, setIsMockMode] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   // Sync data from session storage on mount safely
   useEffect(() => {
     try {
@@ -164,7 +169,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             matricNumber: currentUser.studentProfile?.matricNumber || "CVE/2026/0001",
             department: currentUser.studentProfile?.department || "Civil Engineering",
             companyName: currentUser.studentProfile?.companyName || "BuildCo Ltd",
-            status: currentUser.studentProfile?.pdfUrl ? "Verified by Industry" : "Not Submitted",
+            status: currentUser.studentProfile?.status === "APPROVED"
+              ? "Verified by Industry"
+              : currentUser.studentProfile?.status === "REJECTED"
+              ? "Declined by Industry"
+              : "Pending Verification",
             pdfUrl: currentUser.studentProfile?.pdfUrl || undefined,
             logbookEntries: safeLogs.map((l: any) => ({
               id: l.id,
@@ -276,12 +285,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
     setUser(null);
     clearAuthToken();
     setStudents(initialMockStudents); // Reset back to mock defaults
     setIsMockMode(true);
     sessionStorage.removeItem("siwes_user");
     sessionStorage.removeItem("siwes_mock_mode");
+    setShowLogoutConfirm(false);
   };
 
   const addLogbookEntry = async (entry: Omit<LogEntry, "id" | "approvalStatus">) => {
@@ -356,7 +370,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!isMockMode) {
       try {
         await apiRequest("/student/report", "POST", { pdfUrl: pdfName });
-        if (user) await fetchData(user, false);
+        
+        // Update user state with the report pdfUrl!
+        setUser((prev) => {
+          if (!prev) return null;
+          const updatedUser = {
+            ...prev,
+            studentProfile: prev.studentProfile ? {
+              ...prev.studentProfile,
+              pdfUrl: pdfName,
+            } : null,
+          };
+          sessionStorage.setItem("siwes_user", JSON.stringify(updatedUser));
+          return updatedUser;
+        });
+
+        if (user) {
+          const updatedUserMock = {
+            ...user,
+            studentProfile: user.studentProfile ? {
+              ...user.studentProfile,
+              pdfUrl: pdfName,
+            } : null,
+          };
+          await fetchData(updatedUserMock, false);
+        }
         return;
       } catch (err: any) {
         alert(`API Error: ${err.message}`);
@@ -570,6 +608,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         updatePlacement,
         updateLogbookEntry,
         deleteLogbookEntry,
+        showLogoutConfirm,
+        setShowLogoutConfirm,
+        confirmLogout,
       }}
     >
       {children}

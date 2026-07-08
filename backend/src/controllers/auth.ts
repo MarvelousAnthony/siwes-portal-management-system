@@ -155,7 +155,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { studentProfile: true },
+      include: { 
+        studentProfile: true,
+        reports: true,
+      },
     });
     if (!user) {
       res.status(401).json({ error: "Invalid email or password" });
@@ -175,6 +178,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       { expiresIn: "7d" }
     );
 
+    const mappedStudentProfile = user.studentProfile ? {
+      ...user.studentProfile,
+      pdfUrl: user.reports?.[0]?.pdfUrl || null,
+    } : null;
+
     res.status(200).json({
       message: "Login successful",
       token,
@@ -184,7 +192,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-        studentProfile: user.studentProfile,
+        studentProfile: mappedStudentProfile,
       },
     });
   } catch (error: any) {
