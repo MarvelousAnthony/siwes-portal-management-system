@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "npx prisma generate && tsc",
+    "build": "node node_modules/prisma/build/index.js generate && tsc",
     "start": "node dist/index.js",
     "db:validate": "prisma validate",
     "db:generate": "prisma generate"
