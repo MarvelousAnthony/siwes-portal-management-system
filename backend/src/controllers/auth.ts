@@ -146,7 +146,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     if (!email || !password) {
       res.status(400).json({ error: "Email and password are required" });
@@ -162,6 +162,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
     if (!user) {
       res.status(401).json({ error: "Invalid email or password" });
+      return;
+    }
+
+    if (role && user.role !== role) {
+      res.status(401).json({ error: `Access Denied: Your account role does not match the selected login role.` });
       return;
     }
 

@@ -3,7 +3,7 @@ import { useAuth, LogEntry } from "../context/AuthContext";
 import { Users, FileCheck, Check, X, MessageSquare, LogOut, CheckCircle, Clock, AlertCircle, Sun, Moon } from "lucide-react";
 
 export const IndustryDashboard = () => {
-  const { user, logout, students, verifyLogbookEntry, verifyStudentPlacement, isMockMode, theme, toggleTheme } = useAuth();
+  const { user, logout, students, verifyLogbookEntry, verifyStudentPlacement, isMockMode, theme, toggleTheme, isLoading } = useAuth();
   
   const [selectedStudentId, setSelectedStudentId] = useState<string>("stud-1");
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
@@ -14,6 +14,13 @@ export const IndustryDashboard = () => {
 
   // Guard against crash if students array is empty
   if (students.length === 0) {
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-3 border-emerald-500 border-t-transparent animate-spin"></div>
+        </div>
+      );
+    }
     return (
       <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
         <header className="glass sticky top-0 z-40 border-b border-slate-800/80 px-6 py-4 flex items-center justify-between">

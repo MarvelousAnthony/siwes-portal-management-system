@@ -275,7 +275,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       // Try to login to backend server
-      const res = await apiRequest("/auth/login", "POST", { email, password });
+      const res = await apiRequest("/auth/login", "POST", { email, password, role: _role });
       setAuthToken(res.token);
       
       const authenticatedUser: User = {
