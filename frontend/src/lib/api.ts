@@ -1,18 +1,18 @@
 const API_BASE_URL = (import.meta as any).env.VITE_API_BASE_URL || "http://localhost:4000/api";
 
-// Helper to get JWT token from localStorage
+// Helper to get JWT token from sessionStorage
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem("siwes_token");
+  return sessionStorage.getItem("siwes_token");
 };
 
-// Helper to set JWT token in localStorage
+// Helper to set JWT token in sessionStorage
 export const setAuthToken = (token: string) => {
-  localStorage.setItem("siwes_token", token);
+  sessionStorage.setItem("siwes_token", token);
 };
 
 // Helper to clear JWT token
 export const clearAuthToken = () => {
-  localStorage.removeItem("siwes_token");
+  sessionStorage.removeItem("siwes_token");
 };
 
 // Perform authenticated fetch requests

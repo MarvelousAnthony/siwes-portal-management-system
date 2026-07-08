@@ -114,25 +114,37 @@ const initialMockStudents: StudentProfile[] = [
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [students, setStudents] = useState<StudentProfile[]>(initialMockStudents);
+  const [students, setStudents] = useState<StudentProfile[]>([]);
   const [isMockMode, setIsMockMode] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Sync data from local storage/session storage on mount safely
+  // Sync data from session storage on mount safely
   useEffect(() => {
     try {
-      const savedUser = localStorage.getItem("siwes_user");
-      const savedMockMode = localStorage.getItem("siwes_mock_mode");
+      const savedUser = sessionStorage.getItem("siwes_user");
+      const savedMockMode = sessionStorage.getItem("siwes_mock_mode");
+      
+      let mock = true;
+      if (savedMockMode && savedMockMode !== "undefined") {
+        mock = JSON.parse(savedMockMode);
+        setIsMockMode(mock);
+      }
+      
       if (savedUser && savedUser !== "undefined") {
         setUser(JSON.parse(savedUser));
       }
-      if (savedMockMode && savedMockMode !== "undefined") {
-        setIsMockMode(JSON.parse(savedMockMode));
+
+      // Pre-fill mock data if mock mode is enabled on mount
+      if (mock) {
+        setStudents(initialMockStudents);
+      } else {
+        setStudents([]);
       }
     } catch (e) {
-      console.warn("Failed to parse local storage user session:", e);
-      localStorage.removeItem("siwes_user");
-      localStorage.removeItem("siwes_mock_mode");
+      console.warn("Failed to parse session storage user session:", e);
+      sessionStorage.removeItem("siwes_user");
+      sessionStorage.removeItem("siwes_mock_mode");
+      setStudents(initialMockStudents);
     }
   }, []);
 
@@ -251,8 +263,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(authenticatedUser);
       setIsMockMode(false);
-      localStorage.setItem("siwes_user", JSON.stringify(authenticatedUser));
-      localStorage.setItem("siwes_mock_mode", "false");
+      setStudents([]); // Clear mock data immediately so there is no flash of old data
+      sessionStorage.setItem("siwes_user", JSON.stringify(authenticatedUser));
+      sessionStorage.setItem("siwes_mock_mode", "false");
     } catch (err: any) {
       console.error("Backend auth failed:", err);
       alert(`Authentication Failed: ${err.message || "Invalid credentials"}`);
@@ -265,8 +278,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     clearAuthToken();
-    localStorage.removeItem("siwes_user");
-    localStorage.removeItem("siwes_mock_mode");
+    setStudents(initialMockStudents); // Reset back to mock defaults
+    setIsMockMode(true);
+    sessionStorage.removeItem("siwes_user");
+    sessionStorage.removeItem("siwes_mock_mode");
   };
 
   const addLogbookEntry = async (entry: Omit<LogEntry, "id" | "approvalStatus">) => {
@@ -484,7 +499,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           ...prev,
           studentProfile: res.profile,
         };
-        localStorage.setItem("siwes_user", JSON.stringify(updatedUser));
+        sessionStorage.setItem("siwes_user", JSON.stringify(updatedUser));
         return updatedUser;
       });
 
