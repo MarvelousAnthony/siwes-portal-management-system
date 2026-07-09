@@ -88,12 +88,13 @@ html:not(.dark) .glass {
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04) !important;
 }
 
-html:not(.dark) .bg-slate-900\/60,
-html:not(.dark) .bg-slate-950\/40,
-html:not(.dark) .bg-slate-900\/20,
-html:not(.dark) .bg-slate-900\/80 {
-  background-color: #f1f5f9 !important; /* slate-100 block background */
+html:not(.dark) [class*="bg-slate-900/"] {
+  background-color: rgba(241, 245, 249, 0.6) !important; /* soft slate-100 card */
   border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) [class*="bg-slate-950/"] {
+  background-color: rgba(241, 245, 249, 0.8) !important; /* light slate-100 backdrop */
 }
 
 /* Modals should keep a dark transparent overlay for contrast */
@@ -149,14 +150,19 @@ html:not(.dark) .border-slate-900\/20 {
 }
 
 /* Hover states overrides for backgrounds and borders in Light Mode */
+html:not(.dark) [class*="hover:bg-slate-"]:hover,
+html:not(.dark) [class*="hover:bg-slate-900"]:hover,
+html:not(.dark) [class*="hover:bg-slate-850"]:hover,
 html:not(.dark) .hover\:bg-slate-800:hover,
 html:not(.dark) .hover\:bg-slate-900:hover,
 html:not(.dark) .hover\:bg-slate-850:hover,
 html:not(.dark) .hover\:bg-slate-900\/40:hover,
+html:not(.dark) .hover\:bg-slate-900\/60:hover,
 html:not(.dark) .hover\:bg-slate-950\/40:hover {
-  background-color: #f1f5f9 !important; /* slate-100 background hover */
+  background-color: #e2e8f0 !important; /* slate-200 background hover */
 }
 
+html:not(.dark) [class*="hover:border-slate-"]:hover,
 html:not(.dark) .hover\:border-slate-700:hover {
   border-color: #94a3b8 !important; /* slate-400 border hover */
 }
