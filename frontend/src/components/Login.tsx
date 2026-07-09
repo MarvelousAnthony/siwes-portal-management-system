@@ -14,7 +14,7 @@ interface SupervisorOption {
 }
 
 export const Login = () => {
-  const { login, registerUser, requestPasswordReset, completePasswordReset, theme, toggleTheme } = useAuth();
+  const { login, registerUser, requestPasswordReset, completePasswordReset, theme, toggleTheme, isLoading } = useAuth();
   
   // Auth Modes: 'signin' | 'signup' | 'forgot'
   const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot">("signin");
@@ -304,9 +304,17 @@ export const Login = () => {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm py-3 rounded-xl transition-all duration-200 mt-2 shadow-lg shadow-indigo-500/10 active:scale-98"
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm py-3 rounded-xl transition-all duration-200 mt-2 shadow-lg shadow-indigo-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
-              Authenticate Credentials
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Authenticating...
+                </>
+              ) : (
+                "Authenticate Credentials"
+              )}
             </button>
           </form>
         )}
@@ -529,9 +537,17 @@ export const Login = () => {
             <div className="md:col-span-2 flex justify-end mt-4">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow transition-all duration-200"
+                disabled={isLoading}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs px-6 py-3 rounded-xl shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
               >
-                Register Account
+                {isLoading ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Registering...
+                  </>
+                ) : (
+                  "Register Account"
+                )}
               </button>
             </div>
           </form>
@@ -577,9 +593,17 @@ export const Login = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-150 shadow shadow-indigo-500/10"
+                    disabled={isLoading}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-150 shadow shadow-indigo-500/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                   >
-                    Send Reset Code
+                    {isLoading ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Sending...
+                      </>
+                    ) : (
+                      "Send Reset Code"
+                    )}
                   </button>
                 </div>
               </form>
@@ -642,9 +666,17 @@ export const Login = () => {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-150 shadow shadow-emerald-500/10"
+                    disabled={isLoading}
+                    className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-150 shadow shadow-emerald-500/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                   >
-                    Update Password
+                    {isLoading ? (
+                      <>
+                        <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Updating...
+                      </>
+                    ) : (
+                      "Update Password"
+                    )}
                   </button>
                 </div>
               </form>

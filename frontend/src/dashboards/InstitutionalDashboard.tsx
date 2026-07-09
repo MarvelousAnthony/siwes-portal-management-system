@@ -373,9 +373,17 @@ export const InstitutionalDashboard = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200"
+                  disabled={isLoading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Submit Grade & Review
+                  {isLoading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Grade & Review"
+                  )}
                 </button>
               </form>
             </div>

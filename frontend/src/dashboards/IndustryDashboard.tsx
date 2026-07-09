@@ -377,9 +377,17 @@ export const IndustryDashboard = () => {
 
                     <button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200 active:scale-98"
+                      disabled={isLoading}
+                      className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      Submit Verification
+                      {isLoading ? (
+                        <>
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Submitting...
+                        </>
+                      ) : (
+                        "Submit Verification"
+                      )}
                     </button>
                   </form>
                 </div>
