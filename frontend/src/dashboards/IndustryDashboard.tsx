@@ -9,6 +9,7 @@ export const IndustryDashboard = () => {
   const [activeLogId, setActiveLogId] = useState<string | null>(null);
   const [status, setStatus] = useState<"APPROVED" | "REJECTED" | null>(null);
   const [comments, setComments] = useState("");
+  const [isSubmittingVerification, setIsSubmittingVerification] = useState(false);
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId) || students[0];
 
@@ -83,18 +84,22 @@ export const IndustryDashboard = () => {
 
 
 
-  const handleVerifySubmit = (e: React.FormEvent) => {
+  const handleVerifySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeLogId || !status) {
       alert("Please choose whether to Approve or Reject the entry.");
       return;
     }
-    verifyLogbookEntry(selectedStudent.id, activeLogId, status, comments);
-    
-    // Clear states
-    setActiveLogId(null);
-    setStatus(null);
-    setComments("");
+    setIsSubmittingVerification(true);
+    try {
+      await verifyLogbookEntry(selectedStudent.id, activeLogId, status, comments);
+      // Clear states
+      setActiveLogId(null);
+      setStatus(null);
+      setComments("");
+    } finally {
+      setIsSubmittingVerification(false);
+    }
   };
 
   const renderStatusBadge = (logStatus: LogEntry["approvalStatus"]) => {
@@ -377,10 +382,10 @@ export const IndustryDashboard = () => {
 
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isSubmittingVerification}
                       className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      {isLoading ? (
+                      {isSubmittingVerification ? (
                         <>
                           <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                           Submitting...

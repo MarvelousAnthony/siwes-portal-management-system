@@ -5,7 +5,7 @@ import { Calendar, FileText, Upload, Plus, LogOut, CheckCircle, Clock, AlertCirc
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export const StudentDashboard = () => {
-  const { user, logout, students, addLogbookEntry, submitReport, updatePlacement, updateLogbookEntry, deleteLogbookEntry, isMockMode, theme, toggleTheme, isLoading } = useAuth();
+  const { user, logout, students, addLogbookEntry, submitReport, updatePlacement, updateLogbookEntry, deleteLogbookEntry, isMockMode, theme, toggleTheme } = useAuth();
   // Safe lookup of the student's profile: use first element in students state or fallback to user metadata
   const studentProfile = students[0] || {
     id: user?.id || "unknown",
@@ -65,6 +65,8 @@ export const StudentDashboard = () => {
   const [editMatricNumber, setEditMatricNumber] = useState("");
   const [editPhoneNumber, setEditPhoneNumber] = useState("");
   const [editEmail, setEditEmail] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSubmittingLog, setIsSubmittingLog] = useState(false);
   const [supervisors, setSupervisors] = useState<any[]>([]);
 
   // Sync edit form states when studentProfile finishes loading
@@ -106,7 +108,7 @@ export const StudentDashboard = () => {
     fetchSupervisors();
   }, []);
 
-  const handleUpdatePlacement = (e: React.FormEvent) => {
+  const handleUpdatePlacement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editCompanyName || !editIndSupervisorId) {
       alert("Company Name and Industry Supervisor are required.");
@@ -155,18 +157,23 @@ export const StudentDashboard = () => {
       }
     }
 
-    updatePlacement(
-      editCompanyName, 
-      editCompanyAddress, 
-      editIndSupervisorId, 
-      editStartDate,
-      editFirstName,
-      editLastName,
-      editMatricNumber,
-      editPhoneNumber,
-      editEmail
-    );
-    setShowEditPlacement(false);
+    setIsSavingProfile(true);
+    try {
+      await updatePlacement(
+        editCompanyName, 
+        editCompanyAddress, 
+        editIndSupervisorId, 
+        editStartDate,
+        editFirstName,
+        editLastName,
+        editMatricNumber,
+        editPhoneNumber,
+        editEmail
+      );
+      setShowEditPlacement(false);
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   // Sync reportFile state when database profile finishes loading
@@ -176,24 +183,29 @@ export const StudentDashboard = () => {
     }
   }, [studentProfile.pdfUrl]);
 
-  const handleSubmitLog = (e: React.FormEvent) => {
+  const handleSubmitLog = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !dailyDescription || !skillsAcquired) {
       alert("Please fill in all required logbook fields.");
       return;
     }
-    addLogbookEntry({
-      date,
-      weekNumber: parseInt(weekNumber, 10),
-      dailyDescription,
-      departmentSection,
-      skillsAcquired,
-    });
-    // Reset form
-    setDate("");
-    setDailyDescription("");
-    setDepartmentSection("");
-    setSkillsAcquired("");
+    setIsSubmittingLog(true);
+    try {
+      await addLogbookEntry({
+        date,
+        weekNumber: parseInt(weekNumber, 10),
+        dailyDescription,
+        departmentSection,
+        skillsAcquired,
+      });
+      // Reset form
+      setDate("");
+      setDailyDescription("");
+      setDepartmentSection("");
+      setSkillsAcquired("");
+    } finally {
+      setIsSubmittingLog(false);
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -288,16 +300,21 @@ export const StudentDashboard = () => {
   const currentLog = studentProfile.logbookEntries.find((l) => l.date === date);
   const isEditMode = !!currentLog;
 
-  const handleUpdateLog = (e: React.FormEvent) => {
+  const handleUpdateLog = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentLog) return;
-    updateLogbookEntry(currentLog.id, {
-      date,
-      weekNumber: parseInt(weekNumber, 10),
-      dailyDescription,
-      departmentSection,
-      skillsAcquired,
-    });
+    setIsSubmittingLog(true);
+    try {
+      await updateLogbookEntry(currentLog.id, {
+        date,
+        weekNumber: parseInt(weekNumber, 10),
+        dailyDescription,
+        departmentSection,
+        skillsAcquired,
+      });
+    } finally {
+      setIsSubmittingLog(false);
+    }
   };
 
   const handleDeleteLog = () => {
@@ -521,10 +538,10 @@ export const StudentDashboard = () => {
                 <div className="flex justify-end mt-1">
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isSavingProfile}
                     className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md shadow-indigo-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {isLoading ? (
+                    {isSavingProfile ? (
                       <>
                         <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Saving...
@@ -642,10 +659,10 @@ export const StudentDashboard = () => {
                     ) : (
                       <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isSubmittingLog}
                         className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs px-6 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-indigo-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                       >
-                        {isLoading ? (
+                        {isSubmittingLog ? (
                           <>
                             <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             Saving...
@@ -659,10 +676,10 @@ export const StudentDashboard = () => {
                 ) : (
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isSubmittingLog}
                     className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-sm px-6 py-3 rounded-xl transition-all duration-200 shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    {isLoading ? (
+                    {isSubmittingLog ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         Submitting Log...

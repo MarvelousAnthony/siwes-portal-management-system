@@ -8,6 +8,7 @@ export const InstitutionalDashboard = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<string>("stud-2"); // Default to student with report pre-uploaded
   const [grade, setGrade] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
 
   const selectedStudent = students.find((s) => s.id === selectedStudentId) || students[0];
 
@@ -82,7 +83,7 @@ export const InstitutionalDashboard = () => {
 
 
 
-  const handleGradeSubmit = (e: React.FormEvent) => {
+  const handleGradeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!grade) {
       alert("Please enter a numeric grade.");
@@ -95,10 +96,15 @@ export const InstitutionalDashboard = () => {
       return;
     }
 
-    gradeReport(selectedStudent.id, numericGrade, feedback);
-    setGrade("");
-    setFeedback("");
-    alert(`Successfully graded ${selectedStudent.name}!`);
+    setIsSubmittingGrade(true);
+    try {
+      await gradeReport(selectedStudent.id, numericGrade, feedback);
+      setGrade("");
+      setFeedback("");
+      alert(`Successfully graded ${selectedStudent.name}!`);
+    } finally {
+      setIsSubmittingGrade(false);
+    }
   };
 
   const renderStatusBadge = (status: StudentProfile["status"]) => {
@@ -373,10 +379,10 @@ export const InstitutionalDashboard = () => {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isSubmittingGrade}
                   className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs py-3 rounded-xl transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isLoading ? (
+                  {isSubmittingGrade ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                       Submitting...
