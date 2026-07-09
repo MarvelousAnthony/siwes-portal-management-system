@@ -1,3 +1,4 @@
+// Trigger Vercel build rebuild hook
 import React, { useState, useEffect } from "react";
 import { useAuth, LogEntry } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
