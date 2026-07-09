@@ -28,8 +28,27 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       startDate,
     } = req.body;
 
-    if (!email || !password || !role || !firstName || !lastName) {
+    if (!email || !password || !role || !firstName || !lastName || !phoneNumber) {
       res.status(400).json({ error: "Missing required registration fields" });
+      return;
+    }
+
+    // Strict Nigerian phone number validation
+    const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+    let isPhoneValid = false;
+
+    if (cleanPhone.startsWith("+234")) {
+      isPhoneValid = cleanPhone.length === 14;
+    } else if (cleanPhone.startsWith("234")) {
+      isPhoneValid = cleanPhone.length === 13;
+    } else if (cleanPhone.startsWith("0")) {
+      isPhoneValid = cleanPhone.length === 11;
+    } else {
+      isPhoneValid = cleanPhone.length >= 7; // general fallback
+    }
+
+    if (!isPhoneValid) {
+      res.status(400).json({ error: "Invalid phone number. A valid Nigerian phone number must be 11 digits starting with 0, or international format starting with +234/234." });
       return;
     }
 

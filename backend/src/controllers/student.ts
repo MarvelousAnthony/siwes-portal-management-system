@@ -186,12 +186,17 @@ export const submitReport = async (req: AuthenticatedRequest, res: Response): Pr
 export const updateStudentProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const studentId = req.user!.id;
-    const { companyName, companyAddress, industrySupervisorId, startDate } = req.body;
-
-    if (!companyName) {
-      res.status(400).json({ error: "Company Name is required" });
-      return;
-    }
+    const { 
+      companyName, 
+      companyAddress, 
+      industrySupervisorId, 
+      startDate,
+      firstName,
+      lastName,
+      matricNumber,
+      phoneNumber,
+      email
+    } = req.body;
 
     const profile = await prisma.studentProfile.findUnique({
       where: { studentId },
@@ -202,7 +207,58 @@ export const updateStudentProfile = async (req: AuthenticatedRequest, res: Respo
       return;
     }
 
-    let startParsed = null;
+    const currentUser = await prisma.user.findUnique({
+      where: { id: studentId }
+    });
+
+    if (!currentUser) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    // Validation checks
+    if (email && email !== currentUser.email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        res.status(400).json({ error: "Email address is already in use by another account." });
+        return;
+      }
+    }
+
+    if (matricNumber && matricNumber !== profile.matricNumber) {
+      // Enforce format DEPT/YEAR/INDEX (e.g., CVE/2026/1234) where INDEX is a 4-digit number
+      const matricRegex = /^[A-Z]{3,4}\/\d{4}\/\d{4}$/i;
+      if (!matricRegex.test(matricNumber)) {
+        res.status(400).json({ error: "Matric Number must match the format DEPT/YEAR/INDEX (e.g., CVE/2026/1234)" });
+        return;
+      }
+
+      const existingMatric = await prisma.studentProfile.findUnique({ where: { matricNumber } });
+      if (existingMatric) {
+        res.status(400).json({ error: "Matriculation Number is already in use by another student." });
+        return;
+      }
+    }
+
+    if (phoneNumber) {
+      const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+      let isPhoneValid = false;
+      if (cleanPhone.startsWith("+234")) {
+        isPhoneValid = cleanPhone.length === 14;
+      } else if (cleanPhone.startsWith("234")) {
+        isPhoneValid = cleanPhone.length === 13;
+      } else if (cleanPhone.startsWith("0")) {
+        isPhoneValid = cleanPhone.length === 11;
+      } else {
+        isPhoneValid = cleanPhone.length >= 7;
+      }
+      if (!isPhoneValid) {
+        res.status(400).json({ error: "Invalid phone number. A valid Nigerian phone number must be 11 digits starting with 0, or international format starting with +234/234." });
+        return;
+      }
+    }
+
+    let startParsed = profile.startDate;
     if (startDate) {
       const parsed = new Date(startDate);
       if (!isNaN(parsed.getTime())) {
@@ -210,22 +266,53 @@ export const updateStudentProfile = async (req: AuthenticatedRequest, res: Respo
       }
     }
 
-    const updatedProfile = await prisma.studentProfile.update({
-      where: { studentId },
-      data: {
-        companyName,
-        companyAddress: companyAddress || null,
-        industrySupervisorId: industrySupervisorId || null,
-        startDate: startParsed,
-        status: ApprovalStatus.PENDING, // Reset status to PENDING for the new supervisor to verify
-      },
+    // Determine if placement details changed
+    const placementChanged = 
+      (companyName && companyName !== profile.companyName) ||
+      (companyAddress !== undefined && companyAddress !== profile.companyAddress) ||
+      (industrySupervisorId !== undefined && industrySupervisorId !== profile.industrySupervisorId) ||
+      (startDate !== undefined && startParsed?.getTime() !== profile.startDate?.getTime());
+
+    // Update inside a transaction
+    await prisma.$transaction(async (tx) => {
+      // 1. Update User
+      await tx.user.update({
+        where: { id: studentId },
+        data: {
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+          email: email || undefined,
+          phoneNumber: phoneNumber || undefined,
+        }
+      });
+
+      // 2. Update StudentProfile
+      await tx.studentProfile.update({
+        where: { studentId },
+        data: {
+          companyName: companyName || undefined,
+          companyAddress: companyAddress !== undefined ? companyAddress : undefined,
+          industrySupervisorId: industrySupervisorId !== undefined ? industrySupervisorId : undefined,
+          startDate: startDate !== undefined ? startParsed : undefined,
+          matricNumber: matricNumber || undefined,
+          // Only reset status if placement details actually changed
+          status: placementChanged ? ApprovalStatus.PENDING : undefined,
+        }
+      });
+    });
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: studentId },
+      include: { studentProfile: true }
     });
 
     res.status(200).json({
-      message: "Placement profile updated successfully. Reset to Pending Verification.",
-      profile: updatedProfile,
+      message: placementChanged 
+        ? "Profile updated successfully. Placement details changed - status reset to Pending Verification."
+        : "Profile details updated successfully.",
+      user: updatedUser,
     });
   } catch (error: any) {
-    res.status(500).json({ error: error.message || "Failed to update placement profile" });
+    res.status(500).json({ error: error.message || "Failed to update profile details" });
   }
 };

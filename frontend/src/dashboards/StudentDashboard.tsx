@@ -53,12 +53,17 @@ export const StudentDashboard = () => {
   const [skillsAcquired, setSkillsAcquired] = useState("");
   const [reportFile, setReportFile] = useState<string | null>(studentProfile.pdfUrl || null);
 
-  // Placement edit states
+  // Placement & Profile edit states
   const [showEditPlacement, setShowEditPlacement] = useState(false);
   const [editCompanyName, setEditCompanyName] = useState("");
   const [editCompanyAddress, setEditCompanyAddress] = useState("");
   const [editIndSupervisorId, setEditIndSupervisorId] = useState("");
   const [editStartDate, setEditStartDate] = useState("");
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [editMatricNumber, setEditMatricNumber] = useState("");
+  const [editPhoneNumber, setEditPhoneNumber] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [supervisors, setSupervisors] = useState<any[]>([]);
 
   // Sync edit form states when studentProfile finishes loading
@@ -67,6 +72,11 @@ export const StudentDashboard = () => {
       setEditCompanyName(studentProfile.companyName);
       setEditCompanyAddress(user?.studentProfile?.companyAddress || "");
       setEditIndSupervisorId(user?.studentProfile?.industrySupervisorId || "");
+      setEditFirstName(user?.firstName || "");
+      setEditLastName(user?.lastName || "");
+      setEditMatricNumber(studentProfile.matricNumber || "");
+      setEditPhoneNumber(user?.phoneNumber || "");
+      setEditEmail(user?.email || "");
       
       if (user?.studentProfile?.startDate) {
         const d = new Date(user.studentProfile.startDate);
@@ -101,7 +111,49 @@ export const StudentDashboard = () => {
       alert("Company Name and Industry Supervisor are required.");
       return;
     }
-    updatePlacement(editCompanyName, editCompanyAddress, editIndSupervisorId, editStartDate);
+
+    if (!editFirstName || !editLastName || !editPhoneNumber || !editEmail) {
+      alert("First Name, Last Name, Phone Number, and Email are required.");
+      return;
+    }
+
+    if (editMatricNumber) {
+      const matricRegex = /^[A-Z]{3,4}\/\d{4}\/\d{4}$/i;
+      if (!matricRegex.test(editMatricNumber)) {
+        alert("Matric Number must match the format DEPT/YEAR/INDEX (e.g., CVE/2026/1234)");
+        return;
+      }
+    }
+
+    if (editPhoneNumber) {
+      const cleanPhone = editPhoneNumber.replace(/[^\d+]/g, "");
+      let isPhoneValid = false;
+      if (cleanPhone.startsWith("+234")) {
+        isPhoneValid = cleanPhone.length === 14;
+      } else if (cleanPhone.startsWith("234")) {
+        isPhoneValid = cleanPhone.length === 13;
+      } else if (cleanPhone.startsWith("0")) {
+        isPhoneValid = cleanPhone.length === 11;
+      } else {
+        isPhoneValid = cleanPhone.length >= 7;
+      }
+      if (!isPhoneValid) {
+        alert("Invalid phone number. A valid Nigerian phone number must be 11 digits starting with 0, or international format starting with +234/234.");
+        return;
+      }
+    }
+
+    updatePlacement(
+      editCompanyName, 
+      editCompanyAddress, 
+      editIndSupervisorId, 
+      editStartDate,
+      editFirstName,
+      editLastName,
+      editMatricNumber,
+      editPhoneNumber,
+      editEmail
+    );
     setShowEditPlacement(false);
   };
 
@@ -318,11 +370,11 @@ export const StudentDashboard = () => {
                   >
                     {showEditPlacement ? (
                       <>
-                        <X className="w-3.5 h-3.5" /> Cancel Change
+                        <X className="w-3.5 h-3.5" /> Cancel Edit
                       </>
                     ) : (
                       <>
-                        <Settings className="w-3.5 h-3.5" /> Change Company
+                        <Settings className="w-3.5 h-3.5" /> Edit Profile & Details
                       </>
                     )}
                   </button>
@@ -336,12 +388,78 @@ export const StudentDashboard = () => {
                 <div className="bg-indigo-950/40 border border-indigo-900/40 p-3 rounded-xl text-xs text-indigo-300/80 leading-normal flex items-start gap-2">
                   <Building2 className="w-4 h-4 mt-0.5 text-indigo-400 flex-shrink-0" />
                   <span>
-                    Changing your placement details will reset your profile status to <strong>Pending Verification</strong>. Your new Industry Supervisor will need to verify your placement.
+                    <strong>Note:</strong> Correcting name, email, matric, or phone number will save instantly. Updating placement company details will reset your SIWES verification status to <strong>Pending Verification</strong>.
                   </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Personal Details */}
+                  <div className="md:col-span-2 border-b border-slate-800/60 pb-1">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Personal Profile Details</h3>
+                  </div>
+
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-400">New Placement Company Name *</label>
+                    <label className="text-xs font-semibold text-slate-400">First Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Olamide"
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2 text-xs outline-none transition-all duration-150"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Last Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Gold"
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2 text-xs outline-none transition-all duration-150"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Matric Number *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. CVE/2026/1234"
+                      value={editMatricNumber}
+                      onChange={(e) => setEditMatricNumber(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2 text-xs outline-none transition-all duration-150"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Phone Number *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 08012345678"
+                      value={editPhoneNumber}
+                      onChange={(e) => setEditPhoneNumber(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2 text-xs outline-none transition-all duration-150"
+                      required
+                    />
+                  </div>
+                  <div className="md:col-span-2 flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Email Address *</label>
+                    <input
+                      type="email"
+                      placeholder="e.g. student@siwes.com"
+                      value={editEmail}
+                      onChange={(e) => setEditEmail(e.target.value)}
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 text-slate-100 rounded-xl px-4 py-2 text-xs outline-none transition-all duration-150"
+                      required
+                    />
+                  </div>
+
+                  {/* Placement Details */}
+                  <div className="md:col-span-2 border-b border-slate-800/60 pb-1 mt-2">
+                    <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider">SIWES Placement Details</h3>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Placement Company Name *</label>
                     <input
                       type="text"
                       placeholder="e.g. BuildCo Infrastructures"
@@ -352,7 +470,7 @@ export const StudentDashboard = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-400">New Company Address</label>
+                    <label className="text-xs font-semibold text-slate-400">Company Address</label>
                     <input
                       type="text"
                       placeholder="e.g. Lagos, Nigeria"
@@ -372,7 +490,7 @@ export const StudentDashboard = () => {
                     />
                   </div>
                   <div className="md:col-span-2 flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-slate-400">Select New Industry Supervisor *</label>
+                    <label className="text-xs font-semibold text-slate-400">Select Industry Supervisor *</label>
                     <select
                       value={editIndSupervisorId}
                       onChange={(e) => setEditIndSupervisorId(e.target.value)}
@@ -400,7 +518,7 @@ export const StudentDashboard = () => {
                         Saving...
                       </>
                     ) : (
-                      "Save & Update Placement"
+                      "Save & Update Profile"
                     )}
                   </button>
                 </div>

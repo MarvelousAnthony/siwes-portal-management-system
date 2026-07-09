@@ -9,6 +9,7 @@ export interface User {
   role: Role;
   firstName: string;
   lastName: string;
+  phoneNumber?: string;
   studentProfile?: any;
 }
 
@@ -51,7 +52,17 @@ interface AuthContextType {
   requestPasswordReset: (email: string) => Promise<boolean>;
   completePasswordReset: (email: string, token: string, newPassword: string) => Promise<boolean>;
   verifyStudentPlacement: (studentId: string, status: "APPROVED" | "REJECTED") => Promise<void>;
-  updatePlacement: (companyName: string, companyAddress: string, industrySupervisorId: string, startDate?: string) => Promise<void>;
+  updatePlacement: (
+    companyName: string,
+    companyAddress: string,
+    industrySupervisorId: string,
+    startDate?: string,
+    firstName?: string,
+    lastName?: string,
+    matricNumber?: string,
+    phoneNumber?: string,
+    email?: string
+  ) => Promise<void>;
   updateLogbookEntry: (logId: string, entry: Omit<LogEntry, "id" | "approvalStatus">) => Promise<void>;
   deleteLogbookEntry: (logId: string) => Promise<void>;
   showLogoutConfirm: boolean;
@@ -537,7 +548,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updatePlacement = async (companyName: string, companyAddress: string, industrySupervisorId: string, startDate?: string) => {
+  const updatePlacement = async (
+    companyName: string,
+    companyAddress: string,
+    industrySupervisorId: string,
+    startDate?: string,
+    firstName?: string,
+    lastName?: string,
+    matricNumber?: string,
+    phoneNumber?: string,
+    email?: string
+  ) => {
     setIsLoading(true);
     try {
       const res = await apiRequest("/student/profile", "PUT", {
@@ -545,33 +566,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         companyAddress,
         industrySupervisorId,
         startDate,
+        firstName,
+        lastName,
+        matricNumber,
+        phoneNumber,
+        email,
       });
 
-      // Update user state and localStorage
-      setUser((prev) => {
-        if (!prev) return null;
-        const updatedUser = {
-          ...prev,
-          studentProfile: res.profile,
-        };
-        sessionStorage.setItem("siwes_user", JSON.stringify(updatedUser));
-        return updatedUser;
-      });
+      // Update user state and session storage
+      if (res.user) {
+        setUser(res.user);
+        sessionStorage.setItem("siwes_user", JSON.stringify(res.user));
+        await fetchData(res.user, false);
+      }
 
-      // Update local students list
-      setStudents((prev) =>
-        prev.map((s) =>
-          s.id === user?.id
-            ? {
-                ...s,
-                companyName,
-                status: "Pending Verification",
-              }
-            : s
-        )
-      );
-
-      alert("Placement details and Industry Supervisor updated successfully! Reset to Pending Verification.");
+      alert("Profile and details updated successfully!");
     } catch (err: any) {
       alert(`Update Failed: ${err.message || "Could not complete request"}`);
     } finally {

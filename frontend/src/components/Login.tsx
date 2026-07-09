@@ -82,8 +82,26 @@ export const Login = () => {
 
   const handleSubmitSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !firstName || !lastName) {
-      alert("Please fill in all required registration fields.");
+    if (!email || !password || !firstName || !lastName || !phoneNumber) {
+      alert("Please fill in all required registration fields, including Phone Number.");
+      return;
+    }
+
+    // Nigerian phone number format validation
+    const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+    let isPhoneValid = false;
+    if (cleanPhone.startsWith("+234")) {
+      isPhoneValid = cleanPhone.length === 14;
+    } else if (cleanPhone.startsWith("234")) {
+      isPhoneValid = cleanPhone.length === 13;
+    } else if (cleanPhone.startsWith("0")) {
+      isPhoneValid = cleanPhone.length === 11;
+    } else {
+      isPhoneValid = cleanPhone.length >= 7;
+    }
+
+    if (!isPhoneValid) {
+      alert("Invalid phone number. A valid Nigerian phone number must be exactly 11 digits starting with 0, or international format starting with +234/234.");
       return;
     }
 
