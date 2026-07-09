@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth, Role } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
 import { ShieldCheck, UserPlus, LogIn, KeyRound, ArrowLeft, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 interface SupervisorOption {
   id: string;
@@ -87,21 +88,31 @@ export const Login = () => {
       return;
     }
 
-    // Nigerian phone number format validation
-    const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+    // Global phone number validation check using libphonenumber-js
+    const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
     let isPhoneValid = false;
-    if (cleanPhone.startsWith("+234")) {
-      isPhoneValid = cleanPhone.length === 14;
-    } else if (cleanPhone.startsWith("234")) {
-      isPhoneValid = cleanPhone.length === 13;
+
+    if (cleanPhone.startsWith("+")) {
+      const parsed = parsePhoneNumberFromString(cleanPhone);
+      isPhoneValid = !!(parsed && parsed.isValid());
+    } else if (cleanPhone.startsWith("234") && cleanPhone.length >= 13) {
+      const parsed = parsePhoneNumberFromString("+" + cleanPhone);
+      isPhoneValid = !!(parsed && parsed.isValid());
     } else if (cleanPhone.startsWith("0")) {
-      isPhoneValid = cleanPhone.length === 11;
+      const parsed = parsePhoneNumberFromString(cleanPhone, "NG");
+      isPhoneValid = !!(parsed && parsed.isValid());
     } else {
-      isPhoneValid = cleanPhone.length >= 7;
+      const parsedWithPlus = parsePhoneNumberFromString("+" + cleanPhone);
+      if (parsedWithPlus && parsedWithPlus.isValid()) {
+        isPhoneValid = true;
+      } else {
+        const parsedFallback = parsePhoneNumberFromString(cleanPhone, "NG");
+        isPhoneValid = !!(parsedFallback && parsedFallback.isValid());
+      }
     }
 
     if (!isPhoneValid) {
-      alert("Invalid phone number. A valid Nigerian phone number must be exactly 11 digits starting with 0, or international format starting with +234/234.");
+      alert("Invalid phone number. Please enter a valid phone number matching the standardized digits of your country (e.g. starting with + or correct local format).");
       return;
     }
 

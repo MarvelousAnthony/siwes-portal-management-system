@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth, LogEntry } from "../context/AuthContext";
 import { apiRequest } from "../lib/api";
 import { Calendar, FileText, Upload, Plus, LogOut, CheckCircle, Clock, AlertCircle, Settings, X, Building2, Trash2, Sun, Moon } from "lucide-react";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export const StudentDashboard = () => {
   const { user, logout, students, addLogbookEntry, submitReport, updatePlacement, updateLogbookEntry, deleteLogbookEntry, isMockMode, theme, toggleTheme, isLoading } = useAuth();
@@ -126,19 +127,30 @@ export const StudentDashboard = () => {
     }
 
     if (editPhoneNumber) {
-      const cleanPhone = editPhoneNumber.replace(/[^\d+]/g, "");
+      const cleanPhone = editPhoneNumber.replace(/[\s\-()]/g, "");
       let isPhoneValid = false;
-      if (cleanPhone.startsWith("+234")) {
-        isPhoneValid = cleanPhone.length === 14;
-      } else if (cleanPhone.startsWith("234")) {
-        isPhoneValid = cleanPhone.length === 13;
+
+      if (cleanPhone.startsWith("+")) {
+        const parsed = parsePhoneNumberFromString(cleanPhone);
+        isPhoneValid = !!(parsed && parsed.isValid());
+      } else if (cleanPhone.startsWith("234") && cleanPhone.length >= 13) {
+        const parsed = parsePhoneNumberFromString("+" + cleanPhone);
+        isPhoneValid = !!(parsed && parsed.isValid());
       } else if (cleanPhone.startsWith("0")) {
-        isPhoneValid = cleanPhone.length === 11;
+        const parsed = parsePhoneNumberFromString(cleanPhone, "NG");
+        isPhoneValid = !!(parsed && parsed.isValid());
       } else {
-        isPhoneValid = cleanPhone.length >= 7;
+        const parsedWithPlus = parsePhoneNumberFromString("+" + cleanPhone);
+        if (parsedWithPlus && parsedWithPlus.isValid()) {
+          isPhoneValid = true;
+        } else {
+          const parsedFallback = parsePhoneNumberFromString(cleanPhone, "NG");
+          isPhoneValid = !!(parsedFallback && parsedFallback.isValid());
+        }
       }
+
       if (!isPhoneValid) {
-        alert("Invalid phone number. A valid Nigerian phone number must be 11 digits starting with 0, or international format starting with +234/234.");
+        alert("Invalid phone number. Please enter a valid phone number matching the standardized digits of your country (e.g. starting with + or correct local format).");
         return;
       }
     }

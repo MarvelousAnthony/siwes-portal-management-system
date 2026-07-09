@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import prisma from "../services/db";
 import { Role } from "@prisma/client";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || "your-nextauth-secret-key-at-least-32-chars";
 
@@ -33,22 +34,31 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Strict Nigerian phone number validation
-    const cleanPhone = phoneNumber.replace(/[^\d+]/g, "");
+    // Global phone number validation check using libphonenumber-js
+    const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
     let isPhoneValid = false;
 
-    if (cleanPhone.startsWith("+234")) {
-      isPhoneValid = cleanPhone.length === 14;
-    } else if (cleanPhone.startsWith("234")) {
-      isPhoneValid = cleanPhone.length === 13;
+    if (cleanPhone.startsWith("+")) {
+      const parsed = parsePhoneNumberFromString(cleanPhone);
+      isPhoneValid = !!(parsed && parsed.isValid());
+    } else if (cleanPhone.startsWith("234") && cleanPhone.length >= 13) {
+      const parsed = parsePhoneNumberFromString("+" + cleanPhone);
+      isPhoneValid = !!(parsed && parsed.isValid());
     } else if (cleanPhone.startsWith("0")) {
-      isPhoneValid = cleanPhone.length === 11;
+      const parsed = parsePhoneNumberFromString(cleanPhone, "NG");
+      isPhoneValid = !!(parsed && parsed.isValid());
     } else {
-      isPhoneValid = cleanPhone.length >= 7; // general fallback
+      const parsedWithPlus = parsePhoneNumberFromString("+" + cleanPhone);
+      if (parsedWithPlus && parsedWithPlus.isValid()) {
+        isPhoneValid = true;
+      } else {
+        const parsedFallback = parsePhoneNumberFromString(cleanPhone, "NG");
+        isPhoneValid = !!(parsedFallback && parsedFallback.isValid());
+      }
     }
 
     if (!isPhoneValid) {
-      res.status(400).json({ error: "Invalid phone number. A valid Nigerian phone number must be 11 digits starting with 0, or international format starting with +234/234." });
+      res.status(400).json({ error: "Invalid phone number. Please enter a valid phone number matching the standardized digits of your country (e.g. starting with + or correct local format)." });
       return;
     }
 
