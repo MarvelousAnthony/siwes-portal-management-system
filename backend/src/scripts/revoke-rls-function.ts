@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🔒 Revoking PUBLIC execute access from security definer function 'rls_auto_enable'...");
 
-  // Revoke execute on the function from PUBLIC role
+  // Revoke execute on the function from PUBLIC, anon, and authenticated roles
   await prisma.$executeRawUnsafe(`
-    REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM PUBLIC;
+    REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM PUBLIC, anon, authenticated;
   `);
 
-  console.log("✅ Execute privilege revoked from PUBLIC for 'rls_auto_enable()'.");
+  console.log("✅ Execute privilege revoked from PUBLIC, anon, and authenticated for 'rls_auto_enable()'.");
 }
 
 main()
