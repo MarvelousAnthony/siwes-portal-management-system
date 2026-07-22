@@ -31,6 +31,7 @@ export interface StudentProfile {
   department: string;
   companyName: string;
   status: "Pending Industry" | "Verified by Industry" | "Not Submitted" | "Pending Verification" | "Declined by Industry" | "Submitted";
+  placementStatus?: "PENDING" | "APPROVED" | "REJECTED";
   pdfUrl?: string;
   grade?: number;
   feedback?: string;
@@ -83,6 +84,7 @@ const initialMockStudents: StudentProfile[] = [
     department: "Civil Engineering",
     companyName: "BuildCo Infrastructures Ltd",
     status: "Pending Industry",
+    placementStatus: "PENDING",
     logbookEntries: [
       {
         id: "log-1",
@@ -112,6 +114,7 @@ const initialMockStudents: StudentProfile[] = [
     department: "Computer Science",
     companyName: "SoftTech Dev Labs",
     status: "Verified by Industry",
+    placementStatus: "APPROVED",
     pdfUrl: "siwes_final_report_chioma.pdf",
     logbookEntries: [
       {
@@ -202,6 +205,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             department: currentUser.studentProfile?.department || "Civil Engineering",
             companyName: currentUser.studentProfile?.companyName || "BuildCo Ltd",
             status: currentUser.studentProfile?.pdfUrl ? "Submitted" : "Not Submitted",
+            placementStatus: currentUser.studentProfile?.status || "PENDING",
             pdfUrl: currentUser.studentProfile?.pdfUrl || undefined,
             logbookEntries: safeLogs.map((l: any) => ({
               id: l.id,

@@ -15,6 +15,7 @@ export const StudentDashboard = () => {
     department: user?.studentProfile?.department || "",
     companyName: user?.studentProfile?.companyName || "",
     status: "Not Submitted",
+    placementStatus: user?.studentProfile?.status || "PENDING",
     pdfUrl: undefined,
     logbookEntries: [],
   };
@@ -387,11 +388,29 @@ export const StudentDashboard = () => {
                 <p className="text-sm text-slate-400 mt-1">{studentProfile.department}</p>
               </div>
               <div className="flex flex-col items-start md:items-end gap-2.5">
-                <div className="flex flex-col items-start md:items-end gap-1">
-                  <span className="text-xs text-slate-400">SIWES File Status</span>
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-950/60 border border-indigo-800 text-indigo-300">
-                    {studentProfile.status}
-                  </span>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col items-start md:items-end gap-1">
+                    <span className="text-xs text-slate-400">Placement Status</span>
+                    {studentProfile.placementStatus === "APPROVED" ? (
+                      <span className="px-3 py-1 rounded-full text-[10px] uppercase font-black bg-emerald-950/60 border border-emerald-900/80 text-emerald-400">
+                        Verified by Industry
+                      </span>
+                    ) : studentProfile.placementStatus === "REJECTED" ? (
+                      <span className="px-3 py-1 rounded-full text-[10px] uppercase font-black bg-rose-950/60 border border-rose-900/80 text-rose-400">
+                        Declined by Industry
+                      </span>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-[10px] uppercase font-black bg-amber-950/60 border border-amber-900/80 text-amber-400">
+                        Pending Verification
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-start md:items-end gap-1">
+                    <span className="text-xs text-slate-400">SIWES File Status</span>
+                    <span className="px-3 py-1 rounded-full text-[10px] uppercase font-bold bg-indigo-950/60 border border-indigo-800 text-indigo-300">
+                      {studentProfile.status}
+                    </span>
+                  </div>
                 </div>
                 {!isMockMode && (
                   <button
